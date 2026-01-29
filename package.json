@@ -2,9 +2,11 @@
     "name": "dental-missed-call-mvp",
     "version": "1.0.0",
     "type": "module",
-    "engines": {
-      "node": "24.x"
+    "scripts": {
+      "start": "node index.js"
     },
-    "dependencies": {}
+    "dependencies": {
+      "@supabase/supabase-js": "^2.0.0"
+    }
   }
   
