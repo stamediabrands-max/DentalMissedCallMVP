@@ -32,7 +32,11 @@ async function generateAIMessage(leadName, clinicName, messageType) {
 }
 
 export default async function handler(req, res) {
-  const { lead_id } = req.body;
+  const lead_id = req.body?.lead_id || req.query?.lead_id;
+  if (!lead_id) {
+    return res.status(400).json({ error: 'Липсва lead_id' });
+  }
+  
 
   // 1️⃣ Get lead
   const { data: lead } = await supabase
