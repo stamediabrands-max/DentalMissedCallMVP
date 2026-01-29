@@ -44,7 +44,7 @@ export default async function handler(req, res) {
     if (leadError) return res.status(500).json({ error: leadError.message });
     if (!lead) return res.status(404).json({ error: 'Lead not found' });
 
-    // Fetch settings for clinic name
+    // Fetch clinic name from settings
     const { data: settings } = await supabase
       .from('settings')
       .select('*')
@@ -53,7 +53,7 @@ export default async function handler(req, res) {
 
     const clinicName = settings?.clinic_name || 'Стоматологична клиника Варна';
 
-    // Determine message type (simplified)
+    // Determine message type
     const { data: messages } = await supabase
       .from('messages')
       .select('*')
@@ -80,8 +80,8 @@ export default async function handler(req, res) {
     // Simulate sending SMS
     console.log('SIMULATED SMS to', lead.phone, ':', aiMessage);
 
-    // Save message
-    const { data: newMessage } = await supabase
+    // Save message safely
+    const { data: newMessage, error: insertError } = await supabase
       .from('messages')
       .insert([
         {
@@ -94,6 +94,11 @@ export default async function handler(req, res) {
       .select()
       .single();
 
+    if (insertError || !newMessage) {
+      console.error('Failed to insert message:', insertError);
+      return res.status(500).json({ error: 'Failed to save message', details: insertError?.message });
+    }
+
     // Update lead status
     await supabase
       .from('leads')
@@ -103,6 +108,6 @@ export default async function handler(req, res) {
     res.json({ status: 'Message generated (simulated)', message: aiMessage });
   } catch (err) {
     console.error('Handler error:', err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Internal Server Error', details: err.message });
   }
 }
